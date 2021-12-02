@@ -111,8 +111,9 @@ class Board{
                         Board temp(k);
                         temp = *this;
                         temp.swapVal(i, i, j, j+1);
+                        adjBoard.push_back(temp);
                     }
-                    else if(i==k-1){
+                    else if(j==k-1){
                         Board temp(k);
                         temp = *this;
                         temp.swapVal(i, i, j, j-1);
