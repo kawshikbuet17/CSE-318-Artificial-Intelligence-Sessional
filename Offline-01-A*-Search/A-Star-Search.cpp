@@ -116,6 +116,25 @@ class Board{
         }
         return hammingDistance;
     }
+
+    int linearConflict(){
+        int count = 0;
+        for(int i=0; i<k; i++){
+            for(int j=0; j<k-1; j++){
+                for(int l=j+1; l<k; l++){
+                    if(square[i][j]!=0 and square[i][l]!=0 and square[i][j]>square[i][l] and getCorrectRow(square[i][j])==i and getCorrectRow(square[i][l])==i){
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
+    }
+
+    int linearConflictHeuristic(){
+        return manhattan()+2*linearConflict();
+    }
+
     void printBoard(){
         cout<<"----"<<endl;
         for(int i=0; i<square.size(); i++){
@@ -199,12 +218,12 @@ class Graph {
         return board->isSolvable();
     }
 
-    void A_Star_Search(){
+    void A_Star_Search(int heuristic){
         cout<<"Performing A* Search"<<endl;
         board->setGn(0);
         priority_queue<Board*, vector<Board*>, Compare>pq;
         pq.push(board);
-
+        int num_of_move=0;
         unordered_set<Board*> visited;
 
         while(!pq.empty()){
@@ -228,9 +247,12 @@ class Graph {
                 cout<<"Done"<<endl;
                 cout<<"Hamming Distance: "<<topBoard->hammingDistance()<<endl;
                 cout<<"Manhattan Distance: "<<topBoard->manhattan()<<endl;
+                cout<<"Linear Conflict: "<<topBoard->linearConflict()<<endl;
+                cout<<"Num of Move: "<<num_of_move<<endl;
                 topBoard->printBoard();
                 break;
             }
+            num_of_move++;
 
             int zeroX = -1;
             int zeroY = -1;
@@ -258,7 +280,15 @@ class Graph {
                 newBoard->swapVal(zeroX, new_x, zeroY, new_y );
                 newBoard->setParent(topBoard);
                 newBoard->setGn(newBoard->getParent()->getGn()+1);
-                newBoard->setHn(newBoard->hammingDistance());
+                if(heuristic==1){
+                    newBoard->setHn(newBoard->hammingDistance());
+                }
+                else if(heuristic==2){
+                    newBoard->setHn(newBoard->manhattan());
+                }
+                else if(heuristic==3){
+                    newBoard->setHn(newBoard->linearConflictHeuristic());
+                }
 
                 if(visited.find(newBoard)==visited.end()){
                     pq.push(newBoard);
@@ -291,7 +321,9 @@ int main(){
     graph->printBoard();
     if(graph->isSolvable()){
         cout<<"Puzzle is Solvable"<<endl;
-        graph->A_Star_Search();
+        graph->A_Star_Search(1);
+        graph->A_Star_Search(2);
+        graph->A_Star_Search(3);
     }else{
         cout<<"Puzzle is NOT Solvable"<<endl;
     }
