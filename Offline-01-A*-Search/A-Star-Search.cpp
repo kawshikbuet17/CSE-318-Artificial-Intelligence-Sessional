@@ -69,6 +69,29 @@ class Board{
         return (val-1)%k;
     }
 
+    int getInverseCount(vector<int> arr){
+        int inv_count = 0;
+        for (int i = 0; i < k*k - 1; i++)
+            for (int j = i+1; j < k*k; j++)
+                if (arr[j] && arr[i] &&  arr[i] > arr[j])
+                    inv_count++;
+        cout<<"INV Count = "<<inv_count<<endl;
+        return inv_count;
+    }
+
+    bool isSolvable()
+    {
+        vector<int> arr;
+        for(int i=0; i<k; i++){
+            for(int j=0; j<k; j++){
+                arr.push_back(square[i][j]);
+            }
+        }
+        // Count inversions in given 8 puzzle
+        int invCount = getInverseCount(arr);
+        return (invCount%2 == 0);
+    }
+
     int manhattan(){
         int manhattanDist=0;
         for(int i=0; i<k; i++){
@@ -97,7 +120,12 @@ class Board{
         cout<<"----"<<endl;
         for(int i=0; i<square.size(); i++){
             for(int j=0; j<square[i].size(); j++){
-                cout<<square[i][j]<<" ";
+                if(square[i][j]==0){
+                    cout<<"*"<<" ";
+                }
+                else{
+                    cout<<square[i][j]<<" ";
+                }
             }
             cout<<endl;
         }
@@ -167,11 +195,15 @@ class Graph {
         board->printBoard();
     }
 
+    bool isSolvable(){
+        return board->isSolvable();
+    }
+
     void A_Star_Search(){
+        cout<<"Performing A* Search"<<endl;
         board->setGn(0);
         priority_queue<Board*, vector<Board*>, Compare>pq;
         pq.push(board);
-        cout<<"pushed"<<endl;
 
         unordered_set<Board*> visited;
 
@@ -180,18 +212,6 @@ class Graph {
             topBoard->printBoard();
             pq.pop();
             visited.insert(topBoard);
-            cout<<"DHUKSE"<<endl;
-
-            vector<vector<int>> v {
-                {
-                    1, 2, 3
-                },
-                {
-                    4, 5, 6
-                },{
-                7, 8, 0}
-
-            };
 
             vector<vector<int>> goal;
             int cnt=1;
@@ -205,7 +225,6 @@ class Graph {
             goal[k-1][k-1] = 0;
 
             if(topBoard->getGrid() == goal){
-            //if(topBoard->hammingDistance()==0){
                 cout<<"Done"<<endl;
                 cout<<"Hamming Distance: "<<topBoard->hammingDistance()<<endl;
                 cout<<"Manhattan Distance: "<<topBoard->manhattan()<<endl;
@@ -269,8 +288,13 @@ int main(){
             }
         }
     }
-    cout<<"Inserted from main"<<endl;
     graph->printBoard();
-    graph->A_Star_Search();
+    if(graph->isSolvable()){
+        cout<<"Puzzle is Solvable"<<endl;
+        graph->A_Star_Search();
+    }else{
+        cout<<"Puzzle is NOT Solvable"<<endl;
+    }
+    
     return 0;
 }
