@@ -71,11 +71,11 @@ class Board{
 
     int getInverseCount(vector<int> arr){
         int inv_count = 0;
-        for (int i = 0; i < k*k - 1; i++)
-            for (int j = i+1; j < k*k; j++)
+        for (int i = 0; i < arr.size()-1; i++)
+            for (int j = i+1; j < arr.size(); j++)
                 if (arr[j] && arr[i] &&  arr[i] > arr[j])
                     inv_count++;
-        cout<<"INV Count = "<<inv_count<<endl;
+        // cout<<"INVERSE COUNT = "<<inv_count<<endl;
         return inv_count;
     }
 
@@ -87,9 +87,31 @@ class Board{
                 arr.push_back(square[i][j]);
             }
         }
-        // Count inversions in given 8 puzzle
         int invCount = getInverseCount(arr);
-        return (invCount%2 == 0);
+        if(k%2!=0){
+            return (invCount%2 == 0);
+        }
+        else{
+            int zeroX = -1;
+            int zeroY = -1;
+            for(int i=0; i<k; i++){
+                for(int j=0; j<k; j++){
+                    if(square[i][j]==0){
+                        zeroX = i;
+                        zeroY = j;
+                    }
+                }
+            }
+            if(invCount%2==0 and zeroX%2!=0){
+                return true;
+            }
+            else if(invCount%2!=0 and zeroX%2==0){
+                return true;
+            }
+            else{
+                return false;
+            }
+        }
     }
 
     int manhattan(){
@@ -197,7 +219,9 @@ class Graph {
     int dy[4] = {0, 0, 1, -1};
 
     bool isOutSide(int x, int y){
-        if(x < 0 or x >= k or y<0 or y>=k ) return true;
+        if(x < 0 or x >= k or y<0 or y>=k ){
+            return true;
+        } 
         return false;
     }
 
@@ -218,8 +242,29 @@ class Graph {
         return board->isSolvable();
     }
 
+    void printPath(Board *b){
+        if(b->getParent()!=NULL){
+            printPath(b->getParent());
+        }
+        
+        b->printBoard();
+        
+    }
+
     void A_Star_Search(int heuristic){
-        cout<<"Performing A* Search"<<endl;
+        if(heuristic==1){
+            cout<<"Performing A* Search using hamming distance heuristic"<<endl;
+        }
+        else if(heuristic==2){
+            cout<<"Performing A* Search using manhattan distance heuristic"<<endl;
+        }
+        else if(heuristic==3){
+            cout<<"Performing A* Search using linear conflict heuristic"<<endl;
+        }
+
+        int explored=1;
+        int expanded=0;
+
         board->setGn(0);
         priority_queue<Board*, vector<Board*>, Compare>pq;
         pq.push(board);
@@ -228,7 +273,7 @@ class Graph {
 
         while(!pq.empty()){
             Board *topBoard = pq.top();
-            topBoard->printBoard();
+            // topBoard->printBoard();
             pq.pop();
             visited.insert(topBoard);
 
@@ -245,11 +290,17 @@ class Graph {
 
             if(topBoard->getGrid() == goal){
                 cout<<"Done"<<endl;
-                cout<<"Hamming Distance: "<<topBoard->hammingDistance()<<endl;
-                cout<<"Manhattan Distance: "<<topBoard->manhattan()<<endl;
-                cout<<"Linear Conflict: "<<topBoard->linearConflict()<<endl;
-                cout<<"Num of Move: "<<num_of_move<<endl;
-                topBoard->printBoard();
+                // cout<<"Hamming Distance: "<<topBoard->hammingDistance()<<endl;
+                // cout<<"Manhattan Distance: "<<topBoard->manhattan()<<endl;
+                // cout<<"Linear Conflict: "<<topBoard->linearConflict()<<endl;
+                // cout<<"Num of Move: "<<num_of_move<<endl;
+                cout<<"Cost: "<<topBoard->getGn()<<endl;
+                cout<<"Expanded: "<<visited.size()<<endl;
+                cout<<"Explored: "<<explored<<endl;
+                // topBoard->printBoard();
+
+                cout<<"Printing Path:"<<endl;
+                printPath(topBoard);
                 break;
             }
             num_of_move++;
@@ -292,6 +343,7 @@ class Graph {
 
                 if(visited.find(newBoard)==visited.end()){
                     pq.push(newBoard);
+                    explored++;
                 }
             }
         }
