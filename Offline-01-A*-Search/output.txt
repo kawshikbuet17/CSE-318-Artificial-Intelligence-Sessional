@@ -7,8 +7,8 @@ Puzzle is Solvable
 Performing A* Search using hamming distance heuristic
 Done
 Cost: 16
-Expanded: 20219
-Explored: 56807
+Expanded: 578
+Explored: 996
 Printing Path:
 ----
 3 4 * 
@@ -98,8 +98,8 @@ Printing Path:
 Performing A* Search using manhattan distance heuristic
 Done
 Cost: 16
-Expanded: 294
-Explored: 799
+Expanded: 86
+Explored: 149
 Printing Path:
 ----
 3 4 * 
@@ -189,8 +189,8 @@ Printing Path:
 Performing A* Search using linear conflict heuristic
 Done
 Cost: 16
-Expanded: 136
-Explored: 363
+Expanded: 75
+Explored: 132
 Printing Path:
 ----
 3 4 * 

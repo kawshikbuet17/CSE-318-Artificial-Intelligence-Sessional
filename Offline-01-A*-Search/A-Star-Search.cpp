@@ -329,6 +329,12 @@ class Graph {
                     }
                 }
                 newBoard->swapVal(zeroX, new_x, zeroY, new_y );
+                if(topBoard->getParent()!=NULL){
+                    if(newBoard->getGrid()==topBoard->getParent()->getGrid()){
+                        continue;
+                    }
+                }
+                
                 newBoard->setParent(topBoard);
                 newBoard->setGn(newBoard->getParent()->getGn()+1);
                 if(heuristic==1){
@@ -341,10 +347,8 @@ class Graph {
                     newBoard->setHn(newBoard->linearConflictHeuristic());
                 }
 
-                if(visited.find(newBoard)==visited.end()){
-                    pq.push(newBoard);
-                    explored++;
-                }
+                pq.push(newBoard);
+                explored++;
             }
         }
     }
@@ -373,7 +377,7 @@ int main(){
     graph->printBoard();
     if(graph->isSolvable()){
         cout<<"Puzzle is Solvable"<<endl;
-        graph->A_Star_Search(1);
+        graph->A_Star_Search(1); 
         graph->A_Star_Search(2);
         graph->A_Star_Search(3);
     }else{
