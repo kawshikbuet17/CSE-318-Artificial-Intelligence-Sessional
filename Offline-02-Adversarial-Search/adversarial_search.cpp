@@ -50,6 +50,7 @@ class Mancala{
             int val = bins[input];
             if(val==0){
                 cout<<"no stones in bin "<<val<<" ,discarding input"<<endl;
+                return;
             }
             bins[input] = 0;
             for(int i=1; i<=val; i++){
@@ -80,7 +81,8 @@ class Mancala{
             input+=6;
             int val = bins[input];
             if(val==0){
-                cout<<"no stones in bin "<<val<<endl;
+                cout<<"no stones in bin "<<val<<" ,discarding input"<<endl;
+                return;
             }
             bins[input] = 0;
             for(int i=1; i<=val; i++){
@@ -117,7 +119,7 @@ class Mancala{
     bool rowEmpty(){
         int sum_0 = 0;
         int sum_1 = 0;
-
+        bool boolean = false;
         for(int i=0; i<6; i++){
             sum_0 += bins[i];
         }
@@ -131,17 +133,16 @@ class Mancala{
             for(int i=7; i<12; i++){
                 bins[i] = 0;
             }
-            return true;
+            boolean=true;
         }
         else if(sum_1==0){
             bins[6] += sum_0;
             for(int i=0; i<6; i++){
                 bins[i] = 0;
             }
-            return true;
+            boolean=true;
         }
-        return false;
-
+        return boolean;
     }
 
     void getWinner(){
@@ -154,6 +155,7 @@ class Mancala{
 
         cout<<"Player 0 : "<<bins[6]<<endl;
         cout<<"Player 1 : "<<bins[13]<<endl;
+
     }
 };
 
@@ -161,20 +163,22 @@ int main(){
     FileIO;
     Mancala *mancala = new Mancala();
     mancala->printGameState();
-
+    //cout<<"Turn of 0"<<endl;
     int input;
     while(1){
-       
+        cout<<"Turn : "<<mancala->turn<<endl;
+
         if(mancala->rowEmpty()==false){
             cin>>input;
+            cout<<"Bin : "<<input<<endl;
             if(input==0)
                 break;
-            cout<<"Turn : "<<mancala->turn<<endl;
-            cout<<"Bin : "<<input<<endl;
+
             mancala->chooseBin(input);
         }
         else{
             break;
         }
     }
+    return 0;
 }

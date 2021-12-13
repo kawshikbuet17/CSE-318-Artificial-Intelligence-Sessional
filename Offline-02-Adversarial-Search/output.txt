@@ -180,3 +180,4 @@ ___	___	___	___	___	___	___	___	___	___
 Player 0 is winner
 Player 0 : 26
 Player 1 : 22
+Turn : 1
