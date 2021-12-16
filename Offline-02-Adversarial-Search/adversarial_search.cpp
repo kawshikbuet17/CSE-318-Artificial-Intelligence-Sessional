@@ -19,8 +19,7 @@ class Mancala{
     vector<int>bins;
     int turn;
     bool gameOver;
-    int maxEva;
-    int minEva;
+
     Mancala(){
         bins.resize(NUM_OF_BINS);
         for(int i=0; i<NUM_OF_BINS; i++){
@@ -61,14 +60,20 @@ class Mancala{
                 return;
             }
             distributeStones(MANCALA_1, input, val);
-            //grabStones(MANCALA_0, input, val);
-
-
-            if((input+val)%NUM_OF_BINS!=MANCALA_0){
-                turn = 1-turn;
+            int tempIndex=(input+val)%NUM_OF_BINS;
+            if(bins[tempIndex]==1){
+                if(tempIndex>=0 and tempIndex<=5){
+                    if(bins[12-tempIndex] != 0){
+                        bins[MANCALA_0] += bins[tempIndex] + bins[12-tempIndex] ;
+                        bins[12-tempIndex]=0;
+                        bins[tempIndex]=0;
+                    }
+                }
             }
-            else{
-                ;//cout<<"turn not changed"<<endl;
+
+
+            if(tempIndex != MANCALA_0){
+                turn = 1-turn;
             }
         }
 
@@ -79,18 +84,21 @@ class Mancala{
                 return;
             }
             distributeStones(MANCALA_0, input, val);
-            //grabStones(MANCALA_1, input, val);
+            int tempIndex=(input+val)%NUM_OF_BINS;
+            if(bins[tempIndex]==1){
+                if(tempIndex>=7 and tempIndex<=12){
+                    if(bins[12-tempIndex] != 0){
+                        bins[MANCALA_1] += bins[tempIndex] + bins[12-tempIndex] ;
+                        bins[12-tempIndex]=0;
+                        bins[tempIndex]=0;
+                    }
+                }
+            }
 
-
-            if((input+val)%NUM_OF_BINS != MANCALA_1){
+            if(tempIndex != MANCALA_1){
                 turn = 1-turn;
             }
-            else{
-                ;//cout<<"turn not changed"<<endl;
-            }
         }
-
-
     }
 
     void distributeStones(int avoid, int input, int& val){
@@ -105,14 +113,6 @@ class Mancala{
             }
         }
         //cout<<endl;
-    }
-
-    void grabStones(int to, int input, int val){
-        if(bins[(input+val)%NUM_OF_BINS]==1 and (input+val)%NUM_OF_BINS != to and bins[12-(input+val)%NUM_OF_BINS]!=0){
-            bins[to] += bins[(input+val)%NUM_OF_BINS] + bins[12-(input+val)%NUM_OF_BINS] ;
-            bins[12-(input+val)%NUM_OF_BINS]=0;
-            bins[(input+val)%NUM_OF_BINS]=0;
-        }
     }
 
     bool rowEmpty(){
@@ -202,7 +202,8 @@ class Mancala{
         if(gameOver==true){
             return make_pair(evalHeuristic(1, turn), 1);
         }
-
+        int maxEva;
+        int minEva;
         int eva;
         int index = -1;
         if(turn){
@@ -248,7 +249,7 @@ class Mancala{
 
 
 int main(){
-    //FileIO;
+    FileIO;
     Mancala *mancala = new Mancala();
     mancala->printGameState();
     int input;
