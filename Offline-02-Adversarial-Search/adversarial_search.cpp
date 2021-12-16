@@ -217,8 +217,8 @@ class Mancala{
                 bool gameOverBackup = this->gameOver;
                 chooseBin(i);
                 eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta).first;
-                maxEva = max(maxEva, eva);
-                if(eva==maxEva){
+                if(eva>maxEva){
+                    maxEva = eva;
                     index=i;
                 }
                 bins = b;
@@ -243,10 +243,11 @@ class Mancala{
                 bool gameOverBackup = this->gameOver;
                 chooseBin(i);
                 eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta).first;
-                minEva = min(minEva, eva);
-                if(eva==minEva){
+                if(eva<minEva){
+                    minEva=eva;
                     index=i;
                 }
+
                 bins = b;
                 this->turn = turnBackup;
                 this->gameOver = gameOverBackup;
