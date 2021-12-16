@@ -123,13 +123,13 @@ class Mancala{
             sum_0 += bins[i];
         }
 
-        for(int i=7; i<12; i++){
+        for(int i=7; i<13; i++){
             sum_1 += bins[i];
         }
 
         if(sum_0==0){
             bins[13] += sum_1;
-            for(int i=7; i<12; i++){
+            for(int i=7; i<13; i++){
                 bins[i] = 0;
             }
             boolean=true;
@@ -214,14 +214,21 @@ class Mancala{
                 }
                 vector<int> b = bins;
                 int turnBackup = this->turn;
+                bool gameOverBackup = this->gameOver;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, 0, 0).first;
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta).first;
                 maxEva = max(maxEva, eva);
                 if(eva==maxEva){
                     index=i;
                 }
                 bins = b;
                 this->turn = turnBackup;
+                this->gameOver = gameOverBackup;
+
+                alpha = max(alpha, maxEva);
+                if(beta<=alpha){
+                    break;
+                }
             }
             return make_pair(maxEva, index);
         }
@@ -233,14 +240,20 @@ class Mancala{
                 }
                 vector<int> b = bins;
                 int turnBackup = this->turn;
+                bool gameOverBackup = this->gameOver;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, 0, 0).first;
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta).first;
                 minEva = min(minEva, eva);
                 if(eva==minEva){
                     index=i;
                 }
                 bins = b;
                 this->turn = turnBackup;
+                this->gameOver = gameOverBackup;
+                beta = min(minEva, beta);
+                if(beta<=alpha){
+                    break;
+                }
             }
             return make_pair(minEva,index);
         }
@@ -266,7 +279,7 @@ int main(){
         else{
             ///Play with computer
 
-            int index = mancala->minimaxAlgorithm(7, mancala->turn, 0, 0).second;
+            int index = mancala->minimaxAlgorithm(7, mancala->turn, -INF, INF).second;
             cout<<"Bin : "<<index<<endl;
             //cout<<"Printing current BInS"<<endl;
             //cout<<"TURN___"<<mancala->turn<<endl;
