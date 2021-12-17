@@ -155,14 +155,14 @@ class Mancala{
 
     void getWinner(){
         if(bins[6]>bins[13]){
-            cout<<"Player 0 is winner"<<endl;
-        }
-        else{
             cout<<"Player 1 is winner"<<endl;
         }
+        else{
+            cout<<"Player 2 is winner"<<endl;
+        }
 
-        cout<<"Player 0 : "<<bins[6]<<endl;
-        cout<<"Player 1 : "<<bins[13]<<endl;
+        cout<<"Player 1 : "<<bins[6]<<endl;
+        cout<<"Player 2 : "<<bins[13]<<endl;
 
     }
 
@@ -217,12 +217,12 @@ class Mancala{
         return backup;
     }
 
-    pair<int,int> minimaxAlgorithm(int depth, int turn, int alpha, int beta, int addMoves){
+    pair<int,int> minimaxAlgorithm(int depth, int turn, int alpha, int beta, int addMoves, int heuristicNo){
         if(depth==0){
-            return make_pair(evalHeuristic(3, turn, addMoves), 1);
+            return make_pair(evalHeuristic(heuristicNo, turn, addMoves), 1);
         }
         if(gameOver==true){
-            return make_pair(evalHeuristic(3, turn, addMoves), 1);
+            return make_pair(evalHeuristic(heuristicNo, turn, addMoves), 1);
         }
         int maxEva;
         int minEva;
@@ -239,8 +239,8 @@ class Mancala{
                 bool gameOverBackup = this->gameOver;
                 int additionalMoveBackup = this->additionalMove;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove).first;
-                if(eva>maxEva){
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove, heuristicNo).first;
+                if(eva>=maxEva){
                     maxEva = eva;
                     index=i;
                 }
@@ -267,8 +267,8 @@ class Mancala{
                 bool gameOverBackup = this->gameOver;
                 int additionalMoveBackup = this->additionalMove;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove).first;
-                if(eva<minEva){
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove, heuristicNo).first;
+                if(eva<=minEva){
                     minEva=eva;
                     index=i;
                 }
@@ -290,38 +290,39 @@ class Mancala{
 
 int main(){
     FileIO;
+    int choice;
+    cout<<"AI vs AI : Press 1"<<endl;
+    cout<<"Player vs AI : Press 2"<<endl;
+    cin>>choice;
     Mancala *mancala = new Mancala();
     mancala->printGameState();
     int input;
     while(mancala->gameOver==false){
-        cout<<"Turn : "<<mancala->turn<<endl;
+        cout<<"Turn : "<<mancala->turn+1<<endl;
 
         if(mancala->turn==0){
-            cin>>input;
-            cout<<"Bin : "<<input<<endl;
-            mancala->chooseBin(input-1);
-            mancala->printGameState();
-            mancala->gameOver = mancala->rowEmpty();
+            if(choice==1){
+                int index = mancala->minimaxAlgorithm(4, mancala->turn, -INF, INF, 0, 2).second;
+                cout<<"Bin : "<<7-index<<endl;
+                mancala->chooseBin(index);
+                mancala->printGameState();
+                mancala->gameOver = mancala->rowEmpty();
+            }
+            else if(choice==2){
+                cin>>input;
+                input=7-input;
+                cout<<"Bin : "<<input<<endl;
+                mancala->chooseBin(input-1);
+                mancala->printGameState();
+                mancala->gameOver = mancala->rowEmpty();
+            }
         }
         else{
-            ///Play with computer
-
-            int index = mancala->minimaxAlgorithm(7, mancala->turn, -INF, INF, 0).second;
-            cout<<"Bin : "<<index<<endl;
-            //cout<<"Printing current BInS"<<endl;
-            //cout<<"TURN___"<<mancala->turn<<endl;
-            //mancala->printGameState();
-            //cout<<"Printing current BInE"<<endl;
+            int index = mancala->minimaxAlgorithm(4, mancala->turn, -INF, INF, 0, 2).second;
+            cout<<"Bin : "<<13-index<<endl;
             mancala->chooseBin(index);
             mancala->printGameState();
             mancala->gameOver = mancala->rowEmpty();
-
-            //Play with player
-            //cin>>input;
-            //cout<<"Bin : "<<input<<endl;
-            //mancala->chooseBin(input);
-            //mancala->printGameState();
-            //mancala->gameOver = mancala->rowEmpty();
         }
     }
     mancala->getWinner();
@@ -330,5 +331,3 @@ int main(){
     return 0;
 }
 
-///turn 0, player
-///turn 1, PC
