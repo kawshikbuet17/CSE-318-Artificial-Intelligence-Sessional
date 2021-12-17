@@ -40,7 +40,7 @@ class Mancala{
             // cout<<bins[i]<<"@"<<i<<"\t";
             cout<<bins[i]<<"\t";
         }
-        cout<<"\t"<<"-->P1";
+        cout<<"\t"<<"-->P2";
         cout<<"\n"<<endl;
         cout<<"\t";
         for(int i=0; i<MANCALA_0; i++){
@@ -49,7 +49,7 @@ class Mancala{
         }
         // cout<<bins[MANCALA_0]<<"@"<<MANCALA_0;
         cout<<bins[MANCALA_0];
-        cout<<"\t"<<"-->P0"<<endl;
+        cout<<"\t"<<"-->P1"<<endl;
         cout<<"___\t___\t___\t___\t___\t___\t___\t___\t___\t___\t"<<endl;
     }
 
@@ -167,12 +167,7 @@ class Mancala{
     }
 
     int heuristic1(int turn){
-        if(turn==0){
-            return bins[6]-bins[13];
-        }
-        else{
-            return bins[13]-bins[6];
-        }
+        return bins[13]-bins[6];
     }
 
     int heuristic2(int turn){
@@ -294,6 +289,13 @@ int main(){
     cout<<"AI vs AI : Press 1"<<endl;
     cout<<"Player vs AI : Press 2"<<endl;
     cin>>choice;
+    if(choice==1){
+        cout<<"Playing -> AI vs AI"<<endl;
+    }
+    else{
+        cout<<"Playing -> Player vs AI"<<endl;
+    }
+
     Mancala *mancala = new Mancala();
     mancala->printGameState();
     int input;
@@ -302,16 +304,16 @@ int main(){
 
         if(mancala->turn==0){
             if(choice==1){
-                int index = mancala->minimaxAlgorithm(4, mancala->turn, -INF, INF, 0, 2).second;
-                cout<<"Bin : "<<7-index<<endl;
+                int index = mancala->minimaxAlgorithm(5, mancala->turn, -INF, INF, 0, 1).second;
+                cout<<"Bin : "<<7-(index+1)<<endl;
                 mancala->chooseBin(index);
                 mancala->printGameState();
                 mancala->gameOver = mancala->rowEmpty();
             }
             else if(choice==2){
                 cin>>input;
-                input=7-input;
                 cout<<"Bin : "<<input<<endl;
+                input=7-input;
                 mancala->chooseBin(input-1);
                 mancala->printGameState();
                 mancala->gameOver = mancala->rowEmpty();
