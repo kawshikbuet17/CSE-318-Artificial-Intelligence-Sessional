@@ -19,6 +19,7 @@ class Mancala{
     vector<int>bins;
     int turn;
     bool gameOver;
+    int additionalMove;
 
     Mancala(){
         bins.resize(NUM_OF_BINS);
@@ -29,7 +30,7 @@ class Mancala{
         bins[MANCALA_1] = 0;
         turn = 0;
         gameOver = false;
-
+        additionalMove = 0;
     }
     void printGameState(){
         cout<<"___\t___\t___\t___\t___\t___\t___\t___\t___\t___\t\n"<<endl;
@@ -74,6 +75,10 @@ class Mancala{
 
             if(tempIndex != MANCALA_0){
                 turn = 1-turn;
+                additionalMove=0;
+            }
+            else{
+                additionalMove++;
             }
         }
 
@@ -97,6 +102,10 @@ class Mancala{
 
             if(tempIndex != MANCALA_1){
                 turn = 1-turn;
+                additionalMove=0;
+            }
+            else{
+                additionalMove++;
             }
         }
     }
@@ -170,11 +179,15 @@ class Mancala{
         return W1*heuristic1(turn) + W2*heuristic1(turn);
     }
 
-    int heuristic3(int turn){
-        return heuristic2(turn)+W3;
+    int heuristic3(int turn, int addMoves){
+        return heuristic2(turn)+W3*(addMoves>0);
     }
 
-    int evalHeuristic(int heuristicNo, int turn){
+    int heuristic4(int turn, int addMoves){
+        return heuristic2(turn)+W3*addMoves;
+    }
+
+    int evalHeuristic(int heuristicNo, int turn, int addMoves){
         if(heuristicNo==1){
             return heuristic1(turn);
         }
@@ -182,8 +195,17 @@ class Mancala{
             return heuristic2(turn);
         }
         else if(heuristicNo==3){
-            return heuristic3(turn);
+            // if(addMoves>0){
+            //     cout<<"ADDMOVES: "<<addMoves<<endl;
+            // }
+            return heuristic3(turn, addMoves);
         }
+        else if(heuristicNo==4){
+            return heuristic4(turn, addMoves);
+        }
+        else{
+            return heuristic1(turn);
+        };
     }
 
     vector<int> backupBins(vector<int> v){
@@ -195,12 +217,12 @@ class Mancala{
         return backup;
     }
 
-    pair<int,int> minimaxAlgorithm(int depth, int turn, int alpha, int beta){
+    pair<int,int> minimaxAlgorithm(int depth, int turn, int alpha, int beta, int addMoves){
         if(depth==0){
-            return make_pair(evalHeuristic(1, turn), 1);
+            return make_pair(evalHeuristic(3, turn, addMoves), 1);
         }
         if(gameOver==true){
-            return make_pair(evalHeuristic(1, turn), 1);
+            return make_pair(evalHeuristic(3, turn, addMoves), 1);
         }
         int maxEva;
         int minEva;
@@ -215,8 +237,9 @@ class Mancala{
                 vector<int> b = bins;
                 int turnBackup = this->turn;
                 bool gameOverBackup = this->gameOver;
+                int additionalMoveBackup = this->additionalMove;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta).first;
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove).first;
                 if(eva>maxEva){
                     maxEva = eva;
                     index=i;
@@ -224,6 +247,7 @@ class Mancala{
                 bins = b;
                 this->turn = turnBackup;
                 this->gameOver = gameOverBackup;
+                this->additionalMove = additionalMoveBackup;
 
                 alpha = max(alpha, maxEva);
                 if(beta<=alpha){
@@ -241,8 +265,9 @@ class Mancala{
                 vector<int> b = bins;
                 int turnBackup = this->turn;
                 bool gameOverBackup = this->gameOver;
+                int additionalMoveBackup = this->additionalMove;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta).first;
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove).first;
                 if(eva<minEva){
                     minEva=eva;
                     index=i;
@@ -251,6 +276,7 @@ class Mancala{
                 bins = b;
                 this->turn = turnBackup;
                 this->gameOver = gameOverBackup;
+                this->additionalMove = additionalMoveBackup;
                 beta = min(minEva, beta);
                 if(beta<=alpha){
                     break;
@@ -280,7 +306,7 @@ int main(){
         else{
             ///Play with computer
 
-            int index = mancala->minimaxAlgorithm(7, mancala->turn, -INF, INF).second;
+            int index = mancala->minimaxAlgorithm(7, mancala->turn, -INF, INF, 0).second;
             cout<<"Bin : "<<index<<endl;
             //cout<<"Printing current BInS"<<endl;
             //cout<<"TURN___"<<mancala->turn<<endl;
