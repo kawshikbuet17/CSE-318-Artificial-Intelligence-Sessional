@@ -33,24 +33,22 @@ class Mancala{
         additionalMove = 0;
     }
     void printGameState(){
-        cout<<"___\t___\t___\t___\t___\t___\t___\t___\t___\t___\t\n"<<endl;
-        // cout<<bins[MANCALA_1]<<"@"<<MANCALA_1<<"\t";
-        cout<<bins[MANCALA_1]<<"\t";
+        cout<<"---\t---\t---\t---\t---\t---\t---\t---\t---\t"<<endl;
+        cout<<"\t";
         for(int i=MANCALA_1-1; i>=MANCALA_0+1; i--){
-            // cout<<bins[i]<<"@"<<i<<"\t";
             cout<<bins[i]<<"\t";
         }
-        cout<<"\t"<<"-->P2";
-        cout<<"\n"<<endl;
+        cout<<"\t"<<"-->P2\n";
+        cout<<bins[MANCALA_1]<<"\t\t\t\t\t\t\t"<<bins[MANCALA_0];
+        cout<<endl;
         cout<<"\t";
         for(int i=0; i<MANCALA_0; i++){
-            // cout<<bins[i]<<"@"<<i<<"\t";
              cout<<bins[i]<<"\t";
         }
-        // cout<<bins[MANCALA_0]<<"@"<<MANCALA_0;
-        cout<<bins[MANCALA_0];
+        
         cout<<"\t"<<"-->P1"<<endl;
-        cout<<"___\t___\t___\t___\t___\t___\t___\t___\t___\t___\t"<<endl;
+        cout<<"---\t---\t---\t---\t---\t---\t---\t---\t---\t"<<endl;
+        cout<<endl;
     }
 
     void chooseBin(int input){
@@ -304,7 +302,7 @@ int main(){
 
         if(mancala->turn==0){
             if(choice==1){
-                int index = mancala->minimaxAlgorithm(5, mancala->turn, -INF, INF, 0, 1).second;
+                int index = mancala->minimaxAlgorithm(9, mancala->turn, -INF, INF, 0, 1).second;
                 cout<<"Bin : "<<7-(index+1)<<endl;
                 mancala->chooseBin(index);
                 mancala->printGameState();
