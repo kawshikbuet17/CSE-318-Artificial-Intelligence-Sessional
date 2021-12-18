@@ -4,6 +4,7 @@
 
 #include<bits/stdc++.h>
 using namespace std;
+mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());
 
 #define INF 100000
 #define NUM_OF_BINS 14
@@ -20,6 +21,7 @@ class Mancala{
     int turn;
     bool gameOver;
     int additionalMove;
+    int capture;
 
     Mancala(){
         bins.resize(NUM_OF_BINS);
@@ -31,9 +33,12 @@ class Mancala{
         turn = 0;
         gameOver = false;
         additionalMove = 0;
+        int capture = 0;
     }
+
     void printGameState(){
-        cout<<"---\t---\t---\t---\t---\t---\t---\t---\t---\t"<<endl;
+        cout<<"\t1\t2\t3\t4\t5\t6\t"<<endl;
+        cout<<"---------------------------------------"<<endl;
         cout<<"\t";
         for(int i=MANCALA_1-1; i>=MANCALA_0+1; i--){
             cout<<bins[i]<<"\t";
@@ -47,7 +52,8 @@ class Mancala{
         }
         
         cout<<"\t"<<"-->P1"<<endl;
-        cout<<"---\t---\t---\t---\t---\t---\t---\t---\t---\t"<<endl;
+        cout<<"---------------------------------------"<<endl;
+        cout<<"\t6\t5\t4\t3\t2\t1\t"<<endl;
         cout<<endl;
     }
 
@@ -63,9 +69,13 @@ class Mancala{
             if(bins[tempIndex]==1){
                 if(tempIndex>=0 and tempIndex<=5){
                     if(bins[12-tempIndex] != 0){
+                        capture = bins[tempIndex] + bins[12-tempIndex] ;
                         bins[MANCALA_0] += bins[tempIndex] + bins[12-tempIndex] ;
                         bins[12-tempIndex]=0;
                         bins[tempIndex]=0;
+                    }
+                    else{
+                        capture=0;
                     }
                 }
             }
@@ -91,9 +101,13 @@ class Mancala{
             if(bins[tempIndex]==1){
                 if(tempIndex>=7 and tempIndex<=12){
                     if(bins[12-tempIndex] != 0){
+                        capture = bins[tempIndex] + bins[12-tempIndex] ;
                         bins[MANCALA_1] += bins[tempIndex] + bins[12-tempIndex] ;
                         bins[12-tempIndex]=0;
                         bins[tempIndex]=0;
+                    }
+                    else{
+                        capture=0;
                     }
                 }
             }
@@ -151,54 +165,81 @@ class Mancala{
         return boolean;
     }
 
-    void getWinner(){
-        if(bins[6]>bins[13]){
-            cout<<"Player 1 is winner"<<endl;
-        }
-        else{
-            cout<<"Player 2 is winner"<<endl;
-        }
-
+    int getWinner(){
         cout<<"Player 1 : "<<bins[6]<<endl;
         cout<<"Player 2 : "<<bins[13]<<endl;
-
+        if(bins[6]>bins[13]){
+            cout<<"Player 1 is winner"<<endl;
+            return 1;
+        }
+        else if(bins[6]<bins[13]){
+            cout<<"Player 2 is winner"<<endl;
+            return 2;
+        }
+        else{
+            cout<<"Match Tied"<<endl;
+            return 3;
+        }
     }
 
-    int heuristic1(int turn){
+    int getWinnerInt(){
+        if(bins[6]>bins[13]){
+            return 1;
+        }
+        else if(bins[6]<bins[13]){
+            return 2;
+        }
+        else{
+            return 3;
+        }
+    }
+
+    int heuristic1(){
         return bins[13]-bins[6];
     }
 
-    int heuristic2(int turn){
-        return W1*heuristic1(turn) + W2*heuristic1(turn);
+    int heuristic2(){
+        return W1*heuristic1() + W2*heuristic1();
     }
 
-    int heuristic3(int turn, int addMoves){
-        return heuristic2(turn)+W3*(addMoves>0);
+    int heuristic3(int addMoves){
+        return heuristic2()+W3*(addMoves>0);
     }
 
-    int heuristic4(int turn, int addMoves){
-        return heuristic2(turn)+W3*addMoves;
+    int heuristic4(int addMoves){
+        return heuristic2()+1*addMoves;
     }
 
-    int evalHeuristic(int heuristicNo, int turn, int addMoves){
+    int heuristic5(){
+        return heuristic1()+(24-bins[7]);
+    }
+
+    int heuristic6(int capt){
+        return heuristic1() + capt;
+    }
+
+    int evalHeuristic(int heuristicNo, int turn, int addMoves, int capt){
         if(heuristicNo==1){
-            return heuristic1(turn);
+            return heuristic1();
         }
         else if(heuristicNo==2){
-            return heuristic2(turn);
+            return heuristic2();
         }
         else if(heuristicNo==3){
-            // if(addMoves>0){
-            //     cout<<"ADDMOVES: "<<addMoves<<endl;
-            // }
-            return heuristic3(turn, addMoves);
+            return heuristic3(addMoves);
         }
         else if(heuristicNo==4){
-            return heuristic4(turn, addMoves);
+            return heuristic4(addMoves);
+        }
+        else if(heuristicNo==5){
+            return heuristic5();
+        }
+        else if(heuristicNo==6){
+            return heuristic6(capt);
         }
         else{
-            return heuristic1(turn);
-        };
+            return heuristic1();
+        }
     }
 
     vector<int> backupBins(vector<int> v){
@@ -210,12 +251,12 @@ class Mancala{
         return backup;
     }
 
-    pair<int,int> minimaxAlgorithm(int depth, int turn, int alpha, int beta, int addMoves, int heuristicNo){
+    pair<int,int> minimaxAlgorithm(int depth, int turn, int alpha, int beta, int addMoves, int capt, int heuristicNo){
         if(depth==0){
-            return make_pair(evalHeuristic(heuristicNo, turn, addMoves), 1);
+            return make_pair(evalHeuristic(heuristicNo, turn, addMoves, capt), 1);
         }
         if(gameOver==true){
-            return make_pair(evalHeuristic(heuristicNo, turn, addMoves), 1);
+            return make_pair(evalHeuristic(heuristicNo, turn, addMoves, capt), 1);
         }
         int maxEva;
         int minEva;
@@ -223,7 +264,9 @@ class Mancala{
         int index = -1;
         if(turn){
             maxEva = -INF;
-            for(int i=7; i<13; i++){
+            vector<int>tmp = {7,8,9,10,11,12};
+            shuffle(tmp.begin(), tmp.end(), rng);
+            for(int i:tmp){
                 if(bins[i]==0){
                     continue;
                 }
@@ -232,7 +275,7 @@ class Mancala{
                 bool gameOverBackup = this->gameOver;
                 int additionalMoveBackup = this->additionalMove;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove, heuristicNo).first;
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove, this->capture, heuristicNo).first;
                 if(eva>=maxEva){
                     maxEva = eva;
                     index=i;
@@ -251,7 +294,9 @@ class Mancala{
         }
         else{
             minEva = INF;
-            for(int i=0; i<6; i++){
+            vector<int>tmp = {0,1,2,3,4,5};
+            shuffle(tmp.begin(), tmp.end(), rng);
+            for(int i:tmp){
                 if(bins[i]==0){
                     continue;
                 }
@@ -259,8 +304,9 @@ class Mancala{
                 int turnBackup = this->turn;
                 bool gameOverBackup = this->gameOver;
                 int additionalMoveBackup = this->additionalMove;
+                int captureBackup = this->capture;
                 chooseBin(i);
-                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove, heuristicNo).first;
+                eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove, this->capture, heuristicNo).first;
                 if(eva<=minEva){
                     minEva=eva;
                     index=i;
@@ -270,6 +316,7 @@ class Mancala{
                 this->turn = turnBackup;
                 this->gameOver = gameOverBackup;
                 this->additionalMove = additionalMoveBackup;
+                this->capture = captureBackup;
                 beta = min(minEva, beta);
                 if(beta<=alpha){
                     break;
@@ -280,6 +327,69 @@ class Mancala{
     }
 };
 
+
+int gamePlay(bool csv, int choice, int heu_p1, int heu_p2, int depth_p1, int depth_p2){
+    Mancala *mancala = new Mancala();
+    if(!csv){
+        mancala->printGameState();
+    }
+    
+    int input;
+    while(mancala->gameOver==false){
+        if(!csv){
+            cout<<"Turn : "<<mancala->turn+1<<endl;
+        }
+        
+        if(mancala->turn==0){
+            if(choice==1){
+                int heuristic = heu_p1;
+                int index = mancala->minimaxAlgorithm(depth_p1, mancala->turn, -INF, INF, 0, 0, heuristic).second;
+                
+                if(!csv){
+                    cout<<"Bin : "<<7-(index+1)<<endl;
+                }
+                
+                mancala->chooseBin(index);
+
+                if(!csv){
+                    mancala->printGameState();
+                }
+                
+                mancala->gameOver = mancala->rowEmpty();
+            }
+            else if(choice==2){
+                cin>>input;
+                cout<<"Bin : "<<input<<endl;
+                input=7-input;
+                mancala->chooseBin(input-1);
+                mancala->printGameState();
+                mancala->gameOver = mancala->rowEmpty();
+            }
+        }
+        else{
+            int heuristic = heu_p2;
+            int index = mancala->minimaxAlgorithm(depth_p2, mancala->turn, -INF, INF, 0, 0, heuristic).second;
+            if(!csv){
+                cout<<"Bin : "<<13-index<<endl;
+            }
+            
+            mancala->chooseBin(index);
+            if(!csv){
+                mancala->printGameState();
+            }
+            mancala->gameOver = mancala->rowEmpty();
+        }
+    }
+    int winner ;
+    if(!csv){
+        winner = mancala->getWinner();
+        mancala->printGameState();
+        cout<<"GAME OVER"<<endl;
+    }else{
+        winner = mancala->getWinnerInt();
+    }
+    return winner;
+}
 
 int main(){
     FileIO;
@@ -294,40 +404,37 @@ int main(){
         cout<<"Playing -> Player vs AI"<<endl;
     }
 
-    Mancala *mancala = new Mancala();
-    mancala->printGameState();
-    int input;
-    while(mancala->gameOver==false){
-        cout<<"Turn : "<<mancala->turn+1<<endl;
-
-        if(mancala->turn==0){
-            if(choice==1){
-                int index = mancala->minimaxAlgorithm(9, mancala->turn, -INF, INF, 0, 1).second;
-                cout<<"Bin : "<<7-(index+1)<<endl;
-                mancala->chooseBin(index);
-                mancala->printGameState();
-                mancala->gameOver = mancala->rowEmpty();
+    int csv = 0;
+    if(csv){
+        for(int m=1; m<7; m++){
+            cout<<"Depth = "<<m<<endl;
+            cout<<"P1_Heu,P2_Heu,P1_Win,P2_Win,Draw"<<endl;
+            for(int i=1; i<7; i++){
+                for(int j=1; j<7; j++){
+                    int cnt_p1_win = 0;
+                    int cnt_p2_win = 0;
+                    int draw = 0;
+                    for(int k=0; k<100; k++){
+                        int ret = gamePlay(csv, choice, i, j, m, m);
+                        if(ret==1){
+                            cnt_p1_win++;
+                        }
+                        else if(ret==2){
+                            cnt_p2_win++;
+                        }
+                        else{
+                            draw++;
+                        }
+                    }
+                    cout<<i<<","<<j<<","<<cnt_p1_win<<","<<cnt_p2_win<<","<<draw<<endl;
+                }
             }
-            else if(choice==2){
-                cin>>input;
-                cout<<"Bin : "<<input<<endl;
-                input=7-input;
-                mancala->chooseBin(input-1);
-                mancala->printGameState();
-                mancala->gameOver = mancala->rowEmpty();
-            }
-        }
-        else{
-            int index = mancala->minimaxAlgorithm(4, mancala->turn, -INF, INF, 0, 2).second;
-            cout<<"Bin : "<<13-index<<endl;
-            mancala->chooseBin(index);
-            mancala->printGameState();
-            mancala->gameOver = mancala->rowEmpty();
+            cout<<endl;
         }
     }
-    mancala->getWinner();
-    mancala->printGameState();
-    cout<<"GAME OVER"<<endl;
+    else{
+        gamePlay(csv, choice, 1, 3, 5, 5);
+    }
     return 0;
 }
 
