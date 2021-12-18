@@ -33,12 +33,12 @@ class Mancala{
         turn = 0;
         gameOver = false;
         additionalMove = 0;
-        int capture = 0;
+        capture = 0;
     }
 
     void printGameState(){
         cout<<"\t1\t2\t3\t4\t5\t6\t"<<endl;
-        cout<<"---------------------------------------"<<endl;
+        cout<<"---\t---\t---\t---\t---\t---\t---\t"<<endl;
         cout<<"\t";
         for(int i=MANCALA_1-1; i>=MANCALA_0+1; i--){
             cout<<bins[i]<<"\t";
@@ -50,9 +50,9 @@ class Mancala{
         for(int i=0; i<MANCALA_0; i++){
              cout<<bins[i]<<"\t";
         }
-        
+
         cout<<"\t"<<"-->P1"<<endl;
-        cout<<"---------------------------------------"<<endl;
+        cout<<"---\t---\t---\t---\t---\t---\t---\t"<<endl;
         cout<<"\t6\t5\t4\t3\t2\t1\t"<<endl;
         cout<<endl;
     }
@@ -93,7 +93,7 @@ class Mancala{
         else if(turn==1){
             int val = bins[input];
             if(val==0){
-                cout<<"no stones in bin "<<val<<" ,discarding input"<<endl;
+                cout<<"no stones in bin "<<input<<" ,discarding input"<<endl;
                 return;
             }
             distributeStones(MANCALA_0, input, val);
@@ -210,12 +210,12 @@ class Mancala{
         return heuristic2()+1*addMoves;
     }
 
-    int heuristic5(){
-        return heuristic1()+(24-bins[7]);
+    int heuristic5(int addMoves){
+        return W1*heuristic1()+W2*(addMoves>0);
     }
 
     int heuristic6(int capt){
-        return heuristic1() + capt;
+        return heuristic1() + W3*capt;
     }
 
     int evalHeuristic(int heuristicNo, int turn, int addMoves, int capt){
@@ -232,7 +232,7 @@ class Mancala{
             return heuristic4(addMoves);
         }
         else if(heuristicNo==5){
-            return heuristic5();
+            return heuristic5(addMoves);
         }
         else if(heuristicNo==6){
             return heuristic6(capt);
@@ -274,6 +274,7 @@ class Mancala{
                 int turnBackup = this->turn;
                 bool gameOverBackup = this->gameOver;
                 int additionalMoveBackup = this->additionalMove;
+                int captureBackup = this->capture;
                 chooseBin(i);
                 eva = minimaxAlgorithm(depth-1, this->turn, alpha, beta, this->additionalMove, this->capture, heuristicNo).first;
                 if(eva>=maxEva){
@@ -284,7 +285,7 @@ class Mancala{
                 this->turn = turnBackup;
                 this->gameOver = gameOverBackup;
                 this->additionalMove = additionalMoveBackup;
-
+                this->capture = captureBackup;
                 alpha = max(alpha, maxEva);
                 if(beta<=alpha){
                     break;
@@ -333,28 +334,28 @@ int gamePlay(bool csv, int choice, int heu_p1, int heu_p2, int depth_p1, int dep
     if(!csv){
         mancala->printGameState();
     }
-    
+
     int input;
     while(mancala->gameOver==false){
         if(!csv){
             cout<<"Turn : "<<mancala->turn+1<<endl;
         }
-        
+
         if(mancala->turn==0){
             if(choice==1){
                 int heuristic = heu_p1;
                 int index = mancala->minimaxAlgorithm(depth_p1, mancala->turn, -INF, INF, 0, 0, heuristic).second;
-                
+
                 if(!csv){
                     cout<<"Bin : "<<7-(index+1)<<endl;
                 }
-                
+
                 mancala->chooseBin(index);
 
                 if(!csv){
                     mancala->printGameState();
                 }
-                
+
                 mancala->gameOver = mancala->rowEmpty();
             }
             else if(choice==2){
@@ -372,7 +373,7 @@ int gamePlay(bool csv, int choice, int heu_p1, int heu_p2, int depth_p1, int dep
             if(!csv){
                 cout<<"Bin : "<<13-index<<endl;
             }
-            
+
             mancala->chooseBin(index);
             if(!csv){
                 mancala->printGameState();
@@ -406,9 +407,8 @@ int main(){
 
     int csv = 0;
     if(csv){
+        cout<<"Depth,P1_Heu,P2_Heu,P1_Win,P2_Win,Draw"<<endl;
         for(int m=1; m<7; m++){
-            cout<<"Depth = "<<m<<endl;
-            cout<<"P1_Heu,P2_Heu,P1_Win,P2_Win,Draw"<<endl;
             for(int i=1; i<7; i++){
                 for(int j=1; j<7; j++){
                     int cnt_p1_win = 0;
@@ -426,14 +426,18 @@ int main(){
                             draw++;
                         }
                     }
-                    cout<<i<<","<<j<<","<<cnt_p1_win<<","<<cnt_p2_win<<","<<draw<<endl;
+                    cout<<m<<","<<i<<","<<j<<","<<cnt_p1_win<<","<<cnt_p2_win<<","<<draw<<endl;
                 }
             }
             cout<<endl;
         }
     }
     else{
-        gamePlay(csv, choice, 1, 3, 5, 5);
+        int heu1 = 1;
+        int heu2 = 3;
+        int depth1 = 5;
+        int depth2 = 6;
+        gamePlay(csv, choice, heu1, heu2, depth1, depth2);
     }
     return 0;
 }
