@@ -1,0 +1,204 @@
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.variables.IntVar;
+
+
+public class Sudoku {
+public static void main(String[] args) {
+
+
+int i, j, k;
+
+
+// 1. Create a Model
+Model model = new Model("my first sudoku problem");
+// 2. Create variables
+
+
+
+/* the board which is 9 X 9 */
+/* (0, 0) is the top left position and (8, 8) is the bottom right position */
+/*each cell is an integer variable taking their value in [1, 9] */
+IntVar[][] bd = model.intVarMatrix("bd", 6, 6, 1, 6);
+
+
+ /* the nine rows */
+ /* each row is an array of 9 integer variables taking their value in [1, 9] */
+IntVar[] r0 = model.intVarArray("r0", 6, 1, 6);
+IntVar[] r1 = model.intVarArray("r1", 6, 1, 6);
+IntVar[] r2 = model.intVarArray("r2", 6, 1, 6);
+IntVar[] r3 = model.intVarArray("r3", 6, 1, 6);
+IntVar[] r4 = model.intVarArray("r4", 6, 1, 6);
+IntVar[] r5 = model.intVarArray("r5", 6, 1, 6);
+
+/* the nine columns */
+/* each column is an array of 9 integer variables taking their value in [1, 9] */
+
+IntVar[] c0 = model.intVarArray("c0", 6, 1, 6);
+IntVar[] c1 = model.intVarArray("c1", 6, 1, 6);
+IntVar[] c2 = model.intVarArray("c2", 6, 1, 6);
+IntVar[] c3 = model.intVarArray("c3", 6, 1, 6);
+IntVar[] c4 = model.intVarArray("c4", 6, 1, 6);
+IntVar[] c5 = model.intVarArray("c5", 6, 1, 6);
+
+
+    
+/* for the nine row variables */
+/* each row variable is associated with appropriate cell positions in board */
+    
+for ( j = 0; j < 6; j++)
+  model.arithm (bd[0][j], "=", r0[j]).post();
+  
+for ( j = 0; j < 6; j++)
+  model.arithm (bd[1][j], "=", r1[j]).post();
+    
+for ( j = 0; j < 6; j++)
+  model.arithm (bd[2][j], "=", r2[j]).post();
+
+for ( j = 0; j < 6; j++)
+  model.arithm (bd[3][j], "=", r3[j]).post();
+  
+for ( j = 0; j < 6; j++)
+  model.arithm (bd[4][j], "=", r4[j]).post();
+    
+for ( j = 0; j < 6; j++)
+  model.arithm (bd[5][j], "=", r5[j]).post();
+
+
+
+/* + */
+IntVar[] cage1 = new IntVar[]{bd[0][0], bd[1][0], bd[2][0]};
+model.sum(cage1, "=", 8).post();
+
+IntVar[] cage2 = new IntVar[]{bd[0][4], bd[0][5], bd[1][5]};
+model.sum(cage2, "=", 10).post();
+
+IntVar[] cage3 = new IntVar[]{bd[2][1], bd[3][1], bd[4][1]};
+model.sum(cage3, "=", 12).post();
+
+IntVar[] cage4 = new IntVar[]{bd[2][2], bd[2][3]};
+model.sum(cage4, "=", 8).post();
+
+
+/* * */
+
+
+// int mul2 = bd[1][3].mul(bd[1][4]);
+// int mul3 = bd[3][3].mul(bd[4][3]);
+// int mul4 = bd[4][5].mul(bd[5][5]);
+
+
+
+IntVar mul1 = model.intVar("mul1", 1, 36);
+model.times(bd[0][1], bd[0][2], mul1).post();
+model.times(mul1, bd[0][3], 36).post();
+
+model.times(bd[1][3], bd[1][4], 30).post();
+
+model.times(bd[3][3], bd[4][3], 6).post();
+
+model.times(bd[4][5], bd[5][5], 30).post();
+
+IntVar z1 = bd[2][5].dist(bd[3][5]).intVar();
+IntVar z2 = bd[3][0].dist(bd[4][0]).intVar();
+IntVar z3 = bd[3][2].dist(bd[4][2]).intVar();
+IntVar z4 = bd[5][0].dist(bd[5][1]).intVar();
+IntVar z5 = bd[5][2].dist(bd[5][3]).intVar();
+model.arithm (z1, "=", 1).post();
+model.arithm (z2, "=", 1).post();
+model.arithm (z3, "=", 3).post();
+model.arithm (z4, "=", 3).post();
+model.arithm (z5, "=", 1).post();
+
+// IntVar div1 = model.intVar("div1", 2);
+// div1.eq(bd[1][1].div(bd[1][2])).or(div1.eq(bd[1][2].div(bd[1][1]))).post();
+
+// IntVar div2 = model.intVar("div2", 2);
+// div2.eq(bd[2][4].div(bd[3][4])).or(div2.eq(bd[3][4].div(bd[2][4]))).post();
+
+// IntVar div3 = model.intVar("div3", 3);
+// div3.eq(bd[4][4].div(bd[5][4])).or(div3.eq(bd[5][4].div(bd[4][4]))).post();
+
+
+
+
+
+
+/* for the nine column variables */
+/* each column variable is associated with appropriate cell positions in board */
+
+
+for ( i = 0; i < 6; i++)
+  model.arithm (bd[i][0], "=", c0[i]).post();
+
+for ( i = 0; i < 6; i++)
+  model.arithm (bd[i][1], "=", c1[i]).post();
+
+for ( i = 0; i < 6; i++)
+  model.arithm (bd[i][2], "=", c2[i]).post();
+
+for ( i = 0; i < 6; i++)
+  model.arithm (bd[i][3], "=", c3[i]).post();
+
+for ( i = 0; i < 6; i++)
+  model.arithm (bd[i][4], "=", c4[i]).post();
+
+for ( i = 0; i < 6; i++)
+  model.arithm (bd[i][5], "=", c5[i]).post();
+
+
+
+/* post global constraint alldiff for the nine rows */
+
+model.allDifferent(r0).post();
+model.allDifferent(r1).post();
+model.allDifferent(r2).post();
+model.allDifferent(r3).post();
+model.allDifferent(r4).post();
+model.allDifferent(r5).post();
+
+
+
+/* post global constraint alldiff for the nine columns */
+
+model.allDifferent(c0).post();
+model.allDifferent(c1).post();
+model.allDifferent(c2).post();
+model.allDifferent(c3).post();
+model.allDifferent(c4).post();
+model.allDifferent(c5).post();
+
+
+
+
+// 4. Solve the problem
+
+
+
+
+     Solver solver = model.getSolver();
+
+    solver.showStatistics();
+    solver.showSolutions();
+    solver.findSolution();
+
+
+// 5. Print the solution
+
+for ( i = 0; i < 6; i++)
+    {
+for ( j = 0; j < 6; j++)
+     { 
+  
+        System.out.print(" "); 
+        /* get the value for the board position [i][j] for the solved board */
+        k = bd [i][j].getValue();
+        System.out.print(k );
+     }
+     System.out.println();
+    }
+
+
+}
+
+}
