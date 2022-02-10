@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define DEBUG 2
+#define DEBUG 1
 
 #define FileIO                        \
     freopen("input.txt", "r", stdin); \
@@ -12,6 +12,7 @@ class GhostSensor
 public:
     int n, m, k;
     double p;
+    double r;
     vector<vector<double>> grid;
     vector<vector<double>> backupGrid;
 
@@ -21,6 +22,7 @@ public:
         this->m = m;
         this->k = k;
         p = 0.9;
+        r = 0.85;
         Initialize();
     }
 
@@ -53,12 +55,12 @@ public:
 
     void PrintGrid()
     {
-        cout << endl;
+        cout <<"Printing Grid"<< endl;
         for (int i = 0; i < n; i++)
         {
             for (int j = 0; j < m; j++)
             {
-                cout << fixed << setprecision(3) << grid[i][j] << "\t";
+                cout << fixed << setprecision(4) << grid[i][j] << "\t";
             }
             cout << endl;
         }
@@ -223,6 +225,7 @@ public:
             }
             cout << endl;
         }
+        cout << endl;
     }
 
     void PrintCornerGrid()
@@ -244,6 +247,85 @@ public:
             }
             cout << endl;
         }
+        cout << endl;
+    }
+
+    void PrintEvidenceGrid(int u, int v, int b){
+        cout << "Printing Evidence" << endl;
+        cout<<"u = "<<u<<" v = "<<v<<" b = "<<b<<endl;
+        for(int i=0; i<n; i++){
+            for(int j=0; j<m; j++){
+                if(i==u or i==u+1 or i==u-1){
+                    if(j==v or j==v+1 or j==v-1){
+                        cout<<b<<"\t";
+                    }
+                    else{
+                        cout<<1-b<<"\t";
+                    }
+                }
+                else{
+                    cout<<1-b<<"\t";
+                }
+            }
+            cout<<endl;
+        }
+        cout << endl;
+    }
+
+    void ApplyEvidence(int u, int v, int b){
+        if(b==1){
+            for(int i=0; i<n; i++){
+                for(int j=0; j<m; j++){
+                    if(i==u or i==u+1 or i==u-1){
+                        if(j==v or j==v+1 or j==v-1){
+                            grid[i][j] *= r;
+                        }
+                        else{
+                            grid[i][j] *= (1-r);
+                        }
+                    }
+                    else{
+                        grid[i][j] *= (1-r);
+                    }
+                }
+            }
+        }
+        else{
+            for(int i=0; i<n; i++){
+                for(int j=0; j<m; j++){
+                    if(i==u or i==u+1 or i==u-1){
+                        if(j==v or j==v+1 or j==v-1){
+                            grid[i][j] *= (1-r);
+                        }
+                        else{
+                            grid[i][j] *= r;
+                        }
+                    }
+                    else{
+                        grid[i][j] *= r;
+                    }
+                }
+            }
+        }
+    }
+
+    void CasterPosition(){
+        cout << endl;
+        cout << "Casper's Location ";
+        double maxx = -1;
+        int maxi = -1;
+        int maxj = -1;
+        for(int i=0; i<n; i++){
+            for(int j=0; j<m; j++){
+                if(grid[i][j]>maxx){
+                    maxx = grid[i][j];
+                    maxi = i;
+                    maxj = j;
+                }
+            }
+        }
+        cout<<"("<<maxi<<", "<<maxj<<")"<<endl;
+        cout << endl;
     }
 };
 
@@ -268,6 +350,8 @@ int main()
         ghostsensor->PrintCornerGrid();
     }
 
+    int time = 0;
+
     char c;
     while (cin >> c)
     {
@@ -278,17 +362,25 @@ int main()
         }
         else if (c == 'C')
         {
-            cout << "Caster's Location is " << endl;
+            ghostsensor->CasterPosition();
         }
+
         else if (c == 'R')
         {
             int u, v, b;
             cin >> u >> v >> b;
-        }
-        else if (c == 'K')
-        {
+            cout<<endl<<"Sensor Reading Taken [Time: "<<++time<<"]"<<endl<<endl;
+
+            if(DEBUG==1){
+                ghostsensor->PrintEvidenceGrid(u, v, b);
+            }
+
             cout << "Apply Transition" << endl;
             ghostsensor->ApplyTransition();
+            ghostsensor->PrintGrid();
+
+            cout << "Apply Evidence" << endl;
+            ghostsensor->ApplyEvidence(u, v, b);
             ghostsensor->PrintGrid();
 
             cout << "Normalize" << endl;
