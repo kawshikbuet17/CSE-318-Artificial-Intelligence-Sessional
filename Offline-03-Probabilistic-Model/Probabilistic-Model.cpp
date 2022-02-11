@@ -311,7 +311,7 @@ public:
         }
     }
 
-    void CasterPosition(){
+    void CasperPosition(){
         cout << endl;
         cout << "Casper's Location ";
         double maxx = -1;
@@ -364,7 +364,7 @@ int main()
         }
         else if (c == 'C')
         {
-            ghostsensor->CasterPosition();
+            ghostsensor->CasperPosition();
         }
 
         else if (c == 'R')
