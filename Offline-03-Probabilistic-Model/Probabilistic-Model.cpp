@@ -14,7 +14,6 @@ public:
     double p;
     double r;
     vector<vector<double>> grid;
-    vector<vector<double>> backupGrid;
 
     GhostSensor(int n, int m, int k)
     {
@@ -50,7 +49,6 @@ public:
             cin >> u >> v;
             grid[u][v] = 0;
         }
-        backupGrid = grid;
     }
 
     void PrintGrid()
@@ -149,7 +147,7 @@ public:
 
             if (!IsOutside(new_u, new_v) and !IsObstacle(new_u, new_v))
             {
-                ans += grid[new_u][new_v] * EdgeProbability(u, v);
+                ans += grid[new_u][new_v] * EdgeProbability(new_u, new_v);
             }
         }
 
@@ -163,7 +161,7 @@ public:
 
             if (!IsOutside(new_u, new_v) and !IsObstacle(new_u, new_v))
             {
-                ans += grid[new_u][new_v] * CornerProbability(u, v);
+                ans += grid[new_u][new_v] * CornerProbability(new_u, new_v);
             }
         }
         ans += grid[u][v] * (1 - p) / (CountCorner(u, v) + 1);
@@ -173,17 +171,21 @@ public:
 
     void ApplyTransition()
     {
+        vector<vector<double>> temp;
+        temp.resize(n);
+
         for (int i = 0; i < n; i++)
         {
+            temp[i].resize(m);
             for (int j = 0; j < m; j++)
             {
                 if (grid[i][j] != 0)
                 {
-                    backupGrid[i][j] = CalculateTransition(i, j);
+                    temp[i][j] = CalculateTransition(i, j);
                 }
             }
         }
-        grid = backupGrid;
+        grid = temp;
     }
 
     void Normalize()
